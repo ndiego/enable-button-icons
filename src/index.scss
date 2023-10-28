@@ -1,0 +1,102 @@
+.wp-block-button[class*=has-icon__] {
+    .wp-block-button__link {
+        display: flex;
+        gap: 0.5em;
+        align-items: center;
+
+        span {
+            line-height: 0;
+        }
+
+        svg {
+            color: currentColor;
+            fill: currentColor;
+        }
+    }
+
+    &.has-icon__arrow-left,
+    &.has-icon__arrow-right,
+    &.has-icon__cloud,
+    &.has-icon__cloud-upload {
+        svg {
+            height: 0.7em;
+            width: 1em;
+        }
+    }
+
+    &.has-icon__chevron-left,
+    &.has-icon__chevron-right {
+        svg {
+            height: 0.8em;
+            width: 0.45em;
+        }
+    }
+
+    &.has-icon__chevron-left-small,
+    &.has-icon__chevron-right-small {
+        svg {
+            height: 0.5em;
+            width: 0.3em;
+        }
+    }
+
+    &.has-icon__comment-author-avatar,
+    &.has-icon__help,
+    &.has-icon__info {
+        svg {
+            height: 0.9em;
+            width: 0.9em;
+        }
+    }
+
+    &.has-icon__download {
+        svg {
+            height: 0.8em;
+            width: 0.75em;
+        }
+    }
+
+    &.has-icon__external {
+        svg {
+            height: 0.7em;
+            width: 0.7em;
+        }
+    }
+
+    &.has-icon__external-arrow {
+        svg {
+            height: 0.6em;
+            width: 0.6em;
+        }
+    }
+
+    &.has-icon__lock-outline {
+        svg {
+            height: 0.9em;
+            width: 0.64em;
+        }
+    }
+
+    &.has-icon__login {
+        svg {
+            height: 0.8em;
+            width: 0.8em;
+        }
+    }
+
+    &.has-icon__next,
+    &.has-icon__previous {
+        svg {
+            height: 0.75em;
+            width: 0.775em;
+        }
+    }
+
+    &.has-icon__shuffle,
+    &.has-icon__wordpress {
+        svg {
+            height: 0.9em;
+            width: 0.9em;
+        }
+    }
+} 

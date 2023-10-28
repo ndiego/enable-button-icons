@@ -1,0 +1,61 @@
+/*!***************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[4].use[1]!./node_modules/postcss-loader/dist/cjs.js??ruleSet[1].rules[4].use[2]!./node_modules/sass-loader/dist/cjs.js??ruleSet[1].rules[4].use[3]!./src/index.scss ***!
+  \***************************************************************************************************************************************************************************************************************************************/
+.wp-block-button[class*=has-icon__] .wp-block-button__link {
+  display: flex;
+  gap: 0.5em;
+  align-items: center;
+}
+.wp-block-button[class*=has-icon__] .wp-block-button__link span {
+  line-height: 0;
+}
+.wp-block-button[class*=has-icon__] .wp-block-button__link svg {
+  color: currentColor;
+  fill: currentColor;
+}
+.wp-block-button[class*=has-icon__].has-icon__arrow-left svg, .wp-block-button[class*=has-icon__].has-icon__arrow-right svg, .wp-block-button[class*=has-icon__].has-icon__cloud svg, .wp-block-button[class*=has-icon__].has-icon__cloud-upload svg {
+  height: 0.7em;
+  width: 1em;
+}
+.wp-block-button[class*=has-icon__].has-icon__chevron-left svg, .wp-block-button[class*=has-icon__].has-icon__chevron-right svg {
+  height: 0.8em;
+  width: 0.45em;
+}
+.wp-block-button[class*=has-icon__].has-icon__chevron-left-small svg, .wp-block-button[class*=has-icon__].has-icon__chevron-right-small svg {
+  height: 0.5em;
+  width: 0.3em;
+}
+.wp-block-button[class*=has-icon__].has-icon__comment-author-avatar svg, .wp-block-button[class*=has-icon__].has-icon__help svg, .wp-block-button[class*=has-icon__].has-icon__info svg {
+  height: 0.9em;
+  width: 0.9em;
+}
+.wp-block-button[class*=has-icon__].has-icon__download svg {
+  height: 0.8em;
+  width: 0.75em;
+}
+.wp-block-button[class*=has-icon__].has-icon__external svg {
+  height: 0.7em;
+  width: 0.7em;
+}
+.wp-block-button[class*=has-icon__].has-icon__external-arrow svg {
+  height: 0.6em;
+  width: 0.6em;
+}
+.wp-block-button[class*=has-icon__].has-icon__lock-outline svg {
+  height: 0.9em;
+  width: 0.64em;
+}
+.wp-block-button[class*=has-icon__].has-icon__login svg {
+  height: 0.8em;
+  width: 0.8em;
+}
+.wp-block-button[class*=has-icon__].has-icon__next svg, .wp-block-button[class*=has-icon__].has-icon__previous svg {
+  height: 0.75em;
+  width: 0.775em;
+}
+.wp-block-button[class*=has-icon__].has-icon__shuffle svg, .wp-block-button[class*=has-icon__].has-icon__wordpress svg {
+  height: 0.9em;
+  width: 0.9em;
+}
+
+/*# sourceMappingURL=style.css.map*/
