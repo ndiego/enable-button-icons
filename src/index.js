@@ -84,7 +84,7 @@ export const ICONS = [
 		icon: next,
 	},
 	{
-		label: __( 'Pevious', 'enable-button-icons' ),
+		label: __( 'Previous', 'enable-button-icons' ),
 		value: 'previous',
 		icon: previous,
 	},
