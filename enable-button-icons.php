@@ -2,7 +2,7 @@
 /**
  * Plugin Name:         Enable Button Icons
  * Plugin URI:          https://www.nickdiego.com/
- * Description:         Add icons to Button blocks.
+ * Description:         Easily add icons to Button blocks.
  * Version:             0.1.0
  * Requires at least:   6.3
  * Requires PHP:        7.4
@@ -22,13 +22,11 @@ defined( 'ABSPATH' ) || exit;
  * Enqueue Editor scripts and styles.
  */
 function enable_button_icons_enqueue_block_editor_assets() {
-	$plugin_path = untrailingslashit( plugin_dir_path( __FILE__ ) );
-	$plugin_url  = untrailingslashit( plugin_dir_url( __FILE__ ) );
-	$asset_file  = include untrailingslashit( plugin_dir_path( __FILE__ ) ) . '/build/index.asset.php';
+	$asset_file  = include plugin_dir_path( __FILE__ ) . 'build/editor/index.asset.php';
 
 	wp_enqueue_script(
 		'enable-button-icons-editor-scripts',
-		$plugin_url . '/build/index.js',
+		plugin_dir_url( __FILE__ ) . 'build/index.js',
 		$asset_file['dependencies'],
 		$asset_file['version']
 	);
@@ -36,12 +34,12 @@ function enable_button_icons_enqueue_block_editor_assets() {
     wp_set_script_translations(
         'enable-button-icons-editor-scripts',
         'enable-button-icons',
-        $plugin_path . '/languages'
+        plugin_dir_path( __FILE__ ) . 'languages'
     );
 
 	wp_enqueue_style(
 		'enable-button-icons-editor-styles',
-		$plugin_url . '/build/editor.css'
+		plugin_dir_url( __FILE__ ) . 'build/editor.css'
 	);
 }
 add_action( 'enqueue_block_editor_assets', 'enable_button_icons_enqueue_block_editor_assets' );
@@ -51,16 +49,13 @@ add_action( 'enqueue_block_editor_assets', 'enable_button_icons_enqueue_block_ed
  * (Applies to both frontend and Editor)
  */
 function enable_button_icons_block_styles() {
-    $plugin_path = untrailingslashit( plugin_dir_path( __FILE__ ) );
-	$plugin_url  = untrailingslashit( plugin_dir_url( __FILE__ ) );
-
     wp_enqueue_block_style(
         'core/button',
         array(
             'handle' => 'enable-button-icons-block-styles',
-            'src'    => $plugin_url . '/build/style.css',
+            'src'    => plugin_dir_url( __FILE__ ) . 'build/style.css',
             'ver'    => wp_get_theme()->get( 'Version' ),
-            'path'   => $plugin_path . '/build/style.css',
+            'path'   => plugin_dir_path( __FILE__ ) . 'build/style.css',
         )
     );
 }
