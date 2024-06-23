@@ -22,7 +22,7 @@ defined( 'ABSPATH' ) || exit;
  * Enqueue Editor scripts and styles.
  */
 function enable_button_icons_enqueue_block_editor_assets() {
-	$asset_file  = include plugin_dir_path( __FILE__ ) . 'build/editor/index.asset.php';
+	$asset_file  = include plugin_dir_path( __FILE__ ) . 'build/index.asset.php';
 
 	wp_enqueue_script(
 		'enable-button-icons-editor-scripts',
