@@ -7,152 +7,36 @@ import classnames from 'classnames';
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { addFilter } from '@wordpress/hooks';
-import { InspectorControls } from '@wordpress/block-editor';
+import { addFilter, applyFilters } from '@wordpress/hooks';
 import {
-	Button,
+	BlockControls,
+	InspectorControls,
+	MediaUpload,
+	useBlockEditingMode,
+	useStyleOverride,
+} from '@wordpress/block-editor';
+import {
+	Dropdown,
+	MenuGroup,
+	MenuItem,
+	NavigableMenu,
 	PanelBody,
 	PanelRow,
 	ToggleControl,
+	ToolbarButton,
 	__experimentalGrid as Grid, // eslint-disable-line
 } from '@wordpress/components';
-import {
-	arrowRight,
-	arrowLeft,
-	chevronLeft,
-	chevronLeftSmall,
-	chevronRight,
-	chevronRightSmall,
-	cloud,
-	cloudUpload,
-	commentAuthorAvatar,
-	download,
-	external,
-	help,
-	info,
-	lockOutline,
-	login,
-	next,
-	previous,
-	shuffle,
-	wordpress,
-} from '@wordpress/icons';
+import { useState } from '@wordpress/element';
+import { useSelect } from '@wordpress/data';
+import { code, media as mediaIcon } from '@wordpress/icons';
+import { useInstanceId } from '@wordpress/compose';
 
 /**
- * All available icons.
- * (Order determines presentation order)
+ * Internal dependencies
  */
-export const ICONS = [
-	{
-		label: __( 'Chevron Right', 'enable-button-icons' ),
-		value: 'chevron-right',
-		icon: chevronRight,
-	},
-	{
-		label: __( 'Chevron Left', 'enable-button-icons' ),
-		value: 'chevron-left',
-		icon: chevronLeft,
-	},
-	{
-		label: __( 'Chevron Right (Small)', 'enable-button-icons' ),
-		value: 'chevron-right-small',
-		icon: chevronRightSmall,
-	},
-	{
-		label: __( 'Chevron Left (Small)', 'enable-button-icons' ),
-		value: 'chevron-left-small',
-		icon: chevronLeftSmall,
-	},
-	{
-		label: __( 'Shuffle', 'enable-button-icons' ),
-		value: 'shuffle',
-		icon: shuffle,
-	},
-	{
-		label: __( 'Arrow Right', 'enable-button-icons' ),
-		value: 'arrow-right',
-		icon: arrowRight,
-	},
-	{
-		label: __( 'Arrow Left', 'enable-button-icons' ),
-		value: 'arrow-left',
-		icon: arrowLeft,
-	},
-	{
-		label: __( 'Next', 'enable-button-icons' ),
-		value: 'next',
-		icon: next,
-	},
-	{
-		label: __( 'Previous', 'enable-button-icons' ),
-		value: 'previous',
-		icon: previous,
-	},
-	{
-		label: __( 'Download', 'enable-button-icons' ),
-		value: 'download',
-		icon: download,
-	},
-	{
-		label: __( 'External Arrow', 'enable-button-icons' ),
-		value: 'external-arrow',
-		icon: (
-			<svg
-				width="24"
-				height="24"
-				viewBox="0 0 24 24"
-				xmlns="http://www.w3.org/2000/svg"
-			>
-				<polygon points="18 6 8.15240328 6 8.15240328 8.1101993 14.3985932 8.1101993 6 16.5087925 7.4912075 18 15.8898007 9.6014068 15.8898007 15.8475967 18 15.8475967"></polygon>
-			</svg>
-		),
-	},
-	{
-		label: __( 'External', 'enable-button-icons' ),
-		value: 'external',
-		icon: external,
-	},
-	{
-		label: __( 'Login', 'enable-button-icons' ),
-		value: 'login',
-		icon: login,
-	},
-	{
-		label: __( 'Lock', 'enable-button-icons' ),
-		value: 'lock-outline',
-		icon: lockOutline,
-	},
-	{
-		label: __( 'Avatar', 'enable-button-icons' ),
-		value: 'comment-author-avatar',
-		icon: commentAuthorAvatar,
-	},
-	{
-		label: __( 'Cloud', 'enable-button-icons' ),
-		value: 'cloud',
-		icon: cloud,
-	},
-	{
-		label: __( 'Cloud Upload', 'enable-button-icons' ),
-		value: 'cloud-upload',
-		icon: cloudUpload,
-	},
-	{
-		label: __( 'Help', 'enable-button-icons' ),
-		value: 'help',
-		icon: help,
-	},
-	{
-		label: __( 'Info', 'enable-button-icons' ),
-		value: 'info',
-		icon: info,
-	},
-	{
-		label: __( 'WordPress', 'enable-button-icons' ),
-		value: 'wordpress',
-		icon: wordpress,
-	},
-];
+import { CustomInserterModal, InserterModal } from './components';
+import { parseUploadedMediaAndSetIcon, getIconStyle } from './utils';
+import { bolt as defaultIcon } from './icons/bolt';
 
 /**
  * Add the attributes needed for button icons.
@@ -165,14 +49,19 @@ function addAttributes( settings ) {
 		return settings;
 	}
 
-	// Add the block visibility attributes.
+	// Add the icon attributes.
 	const iconAttributes = {
 		icon: {
+			//string of icon svg (custom, media library)
 			type: 'string',
 		},
 		iconPositionLeft: {
 			type: 'boolean',
 			default: false,
+		},
+		iconName: {
+			//name prop of icon (WordPress icon library, etc)
+			type: 'string',
 		},
 	};
 
@@ -193,73 +82,219 @@ addFilter(
 	addAttributes
 );
 
+// Allowed types for the current WP_User
+function GetAllowedMimeTypes() {
+	const { allowedMimeTypes, mediaUpload } = useSelect( ( select ) => {
+		const { getSettings } = select( 'core/block-editor' );
+
+		// In WordPress 6.1 and lower, allowedMimeTypes returns
+		// null in the post editor, so need to use getEditorSettings.
+		// TODO: Remove once minimum version is bumped to 6.2
+		const { getEditorSettings } = select( 'core/editor' );
+
+		return {
+			allowedMimeTypes: getSettings().allowedMimeTypes
+				? getSettings().allowedMimeTypes
+				: getEditorSettings().allowedMimeTypes,
+			mediaUpload: getSettings().mediaUpload,
+		};
+	}, [] );
+	return { allowedMimeTypes, mediaUpload };
+}
+
 /**
  * Filter the BlockEdit object and add icon inspector controls to button blocks.
  *
  * @since 0.1.0
  * @param {Object} BlockEdit
  */
-function addInspectorControls( BlockEdit ) {
+function addBlockControls( BlockEdit ) {
 	return ( props ) => {
 		if ( props.name !== 'core/button' ) {
 			return <BlockEdit { ...props } />;
 		}
 
 		const { attributes, setAttributes } = props;
-		const { icon: currentIcon, iconPositionLeft } = attributes;
+		const { icon, iconName, iconPositionLeft } = attributes;
+		const { allowedMimeTypes } = GetAllowedMimeTypes();
+		const isSVGUploadAllowed = allowedMimeTypes
+			? Object.values( allowedMimeTypes ).includes( 'image/svg+xml' )
+			: false;
+
+		const [ isInserterOpen, setInserterOpen ] = useState( false );
+		const [ isCustomInserterOpen, setCustomInserterOpen ] =
+			useState( false );
+
+		// Allow the iconBlock to disable custom SVG icons.
+		const enableCustomIcons = applyFilters(
+			'iconBlock.enableCustomIcons',
+			true
+		);
+
+		const isContentOnlyMode = useBlockEditingMode() === 'contentOnly';
+
+		const openOnArrowDown = ( event ) => {
+			if ( event.keyCode === DOWN ) {
+				event.preventDefault();
+				event.target.click();
+			}
+		};
+
+		const replaceText =
+			icon || iconName
+				? __( 'Replace icon', 'icon-block' )
+				: __( 'Add icon', 'icon-block' );
+		const customIconText =
+			icon || iconName
+				? __( 'Add/edit custom icon', 'icon-block' )
+				: __( 'Add custom icon', 'icon-block' );
+
+		const replaceDropdown = (
+			<Dropdown
+				renderToggle={ ( { isOpen, onToggle } ) => (
+					<ToolbarButton
+						aria-expanded={ isOpen }
+						aria-haspopup="true"
+						onClick={ onToggle }
+						onKeyDown={ openOnArrowDown }
+					>
+						{ replaceText }
+					</ToolbarButton>
+				) }
+				style={ { zIndex: 1 } }
+				className="enable-button-icon-dropdown"
+				contentClassName="enable-button-icon-dropdown-content"
+				renderContent={ ( { onClose } ) => (
+					<NavigableMenu className="enable-button-icon-navigableMenu">
+						<MenuGroup>
+							<MenuItem
+								onClick={ () => {
+									setInserterOpen( true );
+									onClose( true );
+								} }
+								icon={ defaultIcon }
+							>
+								{ __( 'Browse Icon Library', 'icon-block' ) }
+							</MenuItem>
+							{ isSVGUploadAllowed && (
+								<MediaUpload
+									onSelect={ ( media ) => {
+										parseUploadedMediaAndSetIcon(
+											media,
+											attributes,
+											setAttributes
+										);
+										onClose( true );
+									} }
+									allowedTypes={ [ 'image/svg+xml' ] }
+									render={ ( { open } ) => (
+										<MenuItem
+											onClick={ open }
+											icon={ mediaIcon }
+										>
+											{ __(
+												'Open Media Library',
+												'icon-block'
+											) }
+										</MenuItem>
+									) }
+									className={
+										'enable-button-icon-media-upload'
+									}
+								/>
+							) }
+							{ enableCustomIcons && (
+								<MenuItem
+									onClick={ () => {
+										setCustomInserterOpen( true );
+										onClose( true );
+									} }
+									icon={ code }
+								>
+									{ customIconText }
+								</MenuItem>
+							) }
+						</MenuGroup>
+						{ ( icon || iconName ) && (
+							<MenuGroup>
+								<MenuItem
+									onClick={ () => {
+										setAttributes( {
+											icon: undefined,
+											iconName: undefined,
+										} );
+										onClose( true );
+									} }
+								>
+									{ __( 'Reset', 'icon-block' ) }
+								</MenuItem>
+							</MenuGroup>
+						) }
+					</NavigableMenu>
+				) }
+			/>
+		);
 
 		return (
 			<>
 				<BlockEdit { ...props } />
-				<InspectorControls>
-					<PanelBody
-						title={ __( 'Icon settings', 'enable-button-icons' ) }
-						className="button-icon-picker"
-						initialOpen={ true }
-					>
-						<PanelRow>
-							<Grid
-								className="button-icon-picker__grid"
-								columns="5"
-								gap="0"
-							>
-								{ ICONS.map( ( icon, index ) => (
-									<Button
-										key={ index }
-										label={ icon?.label }
-										isPressed={ currentIcon === icon.value }
-										className="button-icon-picker__button"
-										onClick={ () =>
-											setAttributes( {
-												// Allow user to disable icons.
-												icon:
-													currentIcon === icon.value
-														? null
-														: icon.value,
-											} )
-										}
-									>
-										{ icon.icon ?? icon.value }
-									</Button>
-								) ) }
-							</Grid>
-						</PanelRow>
-						<PanelRow>
-							<ToggleControl
-								label={ __(
-									'Show icon on left',
-									'enable-button-icons'
-								) }
-								checked={ iconPositionLeft }
-								onChange={ () => {
-									setAttributes( {
-										iconPositionLeft: ! iconPositionLeft,
-									} );
+				<BlockControls group={ isContentOnlyMode ? 'inline' : 'other' }>
+					<>
+						{ enableCustomIcons || isSVGUploadAllowed ? (
+							replaceDropdown
+						) : (
+							<ToolbarButton
+								onClick={ () => {
+									setInserterOpen( true );
 								} }
-							/>
-						</PanelRow>
-					</PanelBody>
-				</InspectorControls>
+							>
+								{ replaceText }
+							</ToolbarButton>
+						) }
+					</>
+				</BlockControls>
+				{ ( icon || iconName ) && (
+					<InspectorControls>
+						<PanelBody
+							title={ __(
+								'Icon settings',
+								'enable-button-icons'
+							) }
+							className="button-icon-picker"
+							initialOpen={ true }
+						>
+							<PanelRow>
+								<ToggleControl
+									label={ __(
+										'Show icon on left',
+										'enable-button-icons'
+									) }
+									checked={ iconPositionLeft }
+									onChange={ () => {
+										setAttributes( {
+											iconPositionLeft:
+												! iconPositionLeft,
+										} );
+									} }
+								/>
+							</PanelRow>
+						</PanelBody>
+					</InspectorControls>
+				) }
+				<InserterModal
+					isInserterOpen={ isInserterOpen }
+					setInserterOpen={ setInserterOpen }
+					attributes={ attributes }
+					setAttributes={ setAttributes }
+				/>
+				{ enableCustomIcons && (
+					<CustomInserterModal
+						isCustomInserterOpen={ isCustomInserterOpen }
+						setCustomInserterOpen={ setCustomInserterOpen }
+						attributes={ attributes }
+						setAttributes={ setAttributes }
+					/>
+				) }
 			</>
 		);
 	};
@@ -267,8 +302,8 @@ function addInspectorControls( BlockEdit ) {
 
 addFilter(
 	'editor.BlockEdit',
-	'enable-button-icons/add-inspector-controls',
-	addInspectorControls
+	'enable-button-icons/add-block-controls',
+	addBlockControls
 );
 
 /**
@@ -281,14 +316,38 @@ function addClasses( BlockListBlock ) {
 	return ( props ) => {
 		const { name, attributes } = props;
 
-		if ( 'core/button' !== name || ! attributes?.icon ) {
+		if (
+			'core/button' !== name ||
+			! ( attributes?.icon || attributes?.iconName )
+		) {
 			return <BlockListBlock { ...props } />;
 		}
 
-		const classes = classnames( props?.className, {
-			[ `has-icon__${ attributes?.icon }` ]: attributes?.icon,
-			'has-icon-position__left': attributes?.iconPositionLeft,
+		const id = useInstanceId( BlockListBlock );
+		const selectorPrefix = `wp-block-button-has-icon-`;
+		const selectorClassname = `${ selectorPrefix }${ id }`;
+		const selector = `.${ selectorClassname } .wp-block-button__link::before, .${ selectorClassname } .wp-block-button__link::after`;
+
+		// Get CSS string for the current icon.
+		// The CSS and `style` element is only output if it is not empty.
+		const css = getIconStyle( {
+			blockName: name,
+			selector,
+			icon: attributes?.icon,
+			iconName: attributes?.iconName,
+			iconPositionLeft: attributes?.iconPositionLeft,
+			style: attributes?.style,
+			hasBlockGapSupport: false,
 		} );
+
+		const classes = classnames( props?.className, {
+			[ `has-icon__${ attributes?.iconName }` ]: attributes?.iconName,
+			'has-icon__custom': attributes?.icon,
+			'has-icon-position__left': attributes?.iconPositionLeft,
+			[ `${ selectorClassname }` ]: true,
+		} );
+
+		useStyleOverride( { css } );
 
 		return <BlockListBlock { ...props } className={ classes } />;
 	};
