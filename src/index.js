@@ -14,6 +14,9 @@ import {
 	MediaUpload,
 	useBlockEditingMode,
 	useStyleOverride,
+	withColors,
+	__experimentalColorGradientSettingsDropdown as ColorGradientSettingsDropdown,
+	__experimentalUseMultipleOriginColorsAndGradients as useMultipleOriginColorsAndGradients,
 } from '@wordpress/block-editor';
 import {
 	Dropdown,
@@ -29,7 +32,7 @@ import {
 import { useState } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { code, media as mediaIcon } from '@wordpress/icons';
-import { useInstanceId } from '@wordpress/compose';
+import { compose, createHigherOrderComponent, useInstanceId } from '@wordpress/compose';
 
 /**
  * Internal dependencies
@@ -63,6 +66,12 @@ function addAttributes( settings ) {
 			//name prop of icon (WordPress icon library, etc)
 			type: 'string',
 		},
+		iconColor: {
+			type: 'string'
+		},
+		customIconColor: {
+			type: 'string'
+		}
 	};
 
 	const newSettings = {
@@ -108,14 +117,14 @@ function GetAllowedMimeTypes() {
  * @since 0.1.0
  * @param {Object} BlockEdit
  */
-function addBlockControls( BlockEdit ) {
+const withBlockControls = createHigherOrderComponent( ( BlockEdit ) => {
 	return ( props ) => {
 		if ( props.name !== 'core/button' ) {
 			return <BlockEdit { ...props } />;
 		}
 
-		const { attributes, setAttributes } = props;
-		const { icon, iconName, iconPositionLeft } = attributes;
+		const { attributes, iconColor, setIconColor, setAttributes, style, clientId } = props;
+		const { icon, iconName, iconPositionLeft, customIconColor } = attributes;
 		const { allowedMimeTypes } = GetAllowedMimeTypes();
 		const isSVGUploadAllowed = allowedMimeTypes
 			? Object.values( allowedMimeTypes ).includes( 'image/svg+xml' )
@@ -132,6 +141,15 @@ function addBlockControls( BlockEdit ) {
 		);
 
 		const isContentOnlyMode = useBlockEditingMode() === 'contentOnly';
+
+		// Ensure a valid string or undefined is passed to colorValue
+		const validColorValue = typeof iconColor === 'string' && iconColor.trim() !== '' 
+		? iconColor 
+		: typeof customIconColor === 'string' && customIconColor.trim() !== ''
+		? customIconColor 
+		: undefined;
+
+		const colorGradientSettings = useMultipleOriginColorsAndGradients();
 
 		const openOnArrowDown = ( event ) => {
 			if ( event.keyCode === DOWN ) {
@@ -254,6 +272,7 @@ function addBlockControls( BlockEdit ) {
 					</>
 				</BlockControls>
 				{ ( icon || iconName ) && (
+					<>
 					<InspectorControls>
 						<PanelBody
 							title={ __(
@@ -280,6 +299,26 @@ function addBlockControls( BlockEdit ) {
 							</PanelRow>
 						</PanelBody>
 					</InspectorControls>
+					<InspectorControls group="color">
+						<ColorGradientSettingsDropdown
+							panelId={ clientId }
+							settings={ [
+								{
+									label: 'Icon',
+									colorValue: validColorValue,
+									onColorChange: ( value ) => {
+										setIconColor( value );
+						
+										setAttributes( {
+											customIconColor: value
+										} );
+									}
+								}
+							]}
+							{ ...colorGradientSettings }
+						/>
+					</InspectorControls>
+					</>
 				) }
 				<InserterModal
 					isInserterOpen={ isInserterOpen }
@@ -298,12 +337,12 @@ function addBlockControls( BlockEdit ) {
 			</>
 		);
 	};
-}
+}, 'withBlockControls');
 
 addFilter(
 	'editor.BlockEdit',
-	'enable-button-icons/add-block-controls',
-	addBlockControls
+	'enable-button-icons/with-block-controls',
+	compose( [ withColors( { iconColor: 'iconColor' }), withBlockControls ] )
 );
 
 /**
@@ -336,8 +375,9 @@ function addClasses( BlockListBlock ) {
 			icon: attributes?.icon,
 			iconName: attributes?.iconName,
 			iconPositionLeft: attributes?.iconPositionLeft,
+			customIconColor: attributes?.customIconColor,
 			style: attributes?.style,
-			hasBlockGapSupport: false,
+			hasBlockGapSupport: true,
 		} );
 
 		const classes = classnames( props?.className, {

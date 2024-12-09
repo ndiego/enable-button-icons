@@ -37,7 +37,8 @@ function svgToDataUri( svg ) {
 export function getIconStyle( {
 	selector,
 	icon,
-	iconName
+	iconName,
+	customIconColor
 } ) {
 	let output = '';
 	const rules = [];
@@ -57,6 +58,9 @@ export function getIconStyle( {
 	const dataUri = svgToDataUri( svg );
 	rules.push( `mask-image: url( ${ dataUri } );` );
 	rules.push( `-webkit-mask-image: url( ${ dataUri } );` );
+	if ( customIconColor ){
+		rules.push( `color: ${ customIconColor };` );
+	}
 	if ( rules.length ) {
 		output = `${ appendSelectors( selector ) } {
             ${ rules.join( '; ' ) };

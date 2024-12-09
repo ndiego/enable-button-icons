@@ -83,6 +83,13 @@ function enable_button_icons_render_block_button( $block_content, $block ) {
 	$icon         = $block['attrs']['icon'];
 	$icon_name	  = $block['attrs']['iconName'] ? $block['attrs']['iconName'] : 'custom';
 	$positionLeft = isset( $block['attrs']['iconPositionLeft'] ) ? $block['attrs']['iconPositionLeft'] : false;
+	$icon_color_class = '';
+	$icon_color = '';
+	if( isset( $block['attrs']['iconColor'] ) ){
+		$icon_color_class = ' has-' . $block['attrs']['iconColor'] . '-color';
+	} elseif ( isset( $block['attrs']['customIconColor'] ) ) {
+		$icon_color = 'style="color:' . $block['attrs']['customIconColor'] . ';"';
+	}
 	
 	// Append the icon class to the block.
 	$p = new WP_HTML_Tag_Processor( $block_content );
@@ -93,8 +100,8 @@ function enable_button_icons_render_block_button( $block_content, $block ) {
 
 	// Add the SVG icon either to the left of right of the button text.
 	$block_content = $positionLeft 
-		? preg_replace( '/(<a[^>]*>)(.*?)(<\/a>)/i', '$1<span class="wp-block-button__link-icon" aria-hidden="true">' . $icon . '</span>$2$3', $block_content )
-		: preg_replace( '/(<a[^>]*>)(.*?)(<\/a>)/i', '$1$2<span class="wp-block-button__link-icon" aria-hidden="true">' . $icon . '</span>$3', $block_content );
+		? preg_replace( '/(<a[^>]*>)(.*?)(<\/a>)/i', '$1<span class="wp-block-button__link-icon' . $icon_color_class . '" aria-hidden="true" ' . $icon_color . '>' . $icon . '</span>$2$3', $block_content )
+		: preg_replace( '/(<a[^>]*>)(.*?)(<\/a>)/i', '$1$2<span class="wp-block-button__link-icon' . $icon_color_class . '" aria-hidden="true" ' . $icon_color . '>' . $icon . '</span>$3', $block_content );
 
 	return $block_content;
 }
