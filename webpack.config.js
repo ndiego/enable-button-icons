@@ -9,13 +9,10 @@ module.exports = {
 	...defaultConfig,
 
 	entry: {
-		'index' : path.resolve( process.cwd(), 'src/index.js' ),
-		'editor' : path.resolve( process.cwd(), 'src/editor.scss' ),
-	    'style': path.resolve( process.cwd(), 'src/index.scss' ),
+		index: path.resolve( process.cwd(), 'src/index.js' ),
+		editor: path.resolve( process.cwd(), 'src/editor.scss' ),
+		style: path.resolve( process.cwd(), 'src/index.scss' ),
 	},
 
-	plugins: [
-		...defaultConfig.plugins,
-        new RemoveEmptyScriptsPlugin(),
-	],
+	plugins: [ ...defaultConfig.plugins, new RemoveEmptyScriptsPlugin() ],
 };
