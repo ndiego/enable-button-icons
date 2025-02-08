@@ -52,3 +52,4 @@ jobs:
             !yarn.lock
             !src/
             !node_modules/
+            !_playground/
