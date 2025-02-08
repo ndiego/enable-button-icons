@@ -1,38 +1,54 @@
-name: Publish Website
+name: Deploy Plugin
 
 on:
   push:
     branches:
       - main
   workflow_dispatch:
+
 jobs:
-  Build-Artifact-Action:
-    name: Build-Artifact-Action
+  Deploy-Plugin:
+    name: Deploy-Plugin
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@master
-    - name: Upload the artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: wpcom
-        path: |
-          .
-          !.DS_Store 
-          !.stylelintrc.json 
-          !.eslintrc 
-          !.git 
-          !.gitattributes 
-          !.github 
-          !.gitignore 
-          !README.md 
-          !composer.json 
-          !composer.lock 
-          !node_modules 
-          !vendor
-          !package-lock.json 
-          !package.json 
-          !.travis.yml 
-          !phpcs.xml.dist 
-          !sass 
-          !style.css.map 
-          !yarn.lock
+      - uses: actions/checkout@master
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          
+      - name: Install Dependencies
+        run: npm install
+        
+      - name: Build
+        run: npm run build
+        
+      - name: Upload the artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: wpcom
+          path: |
+            .
+            !.DS_Store 
+            !.stylelintrc.json 
+            !.eslintrc 
+            !.git 
+            !.gitattributes 
+            !.github 
+            !.gitignore 
+            !README.md 
+            !composer.json 
+            !composer.lock 
+            !node_modules 
+            !vendor
+            !package-lock.json 
+            !package.json
+            !webpack.config.js
+            !.travis.yml 
+            !phpcs.xml.dist 
+            !sass 
+            !style.css.map 
+            !yarn.lock
+            !src/
+            !node_modules/
