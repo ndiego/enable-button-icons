@@ -12,6 +12,24 @@
             color: currentColor;
             fill: currentColor;
         }
+
+        &.has-text-align-center {
+            justify-content: center;
+        }
+    
+        &.has-text-align-right {
+            justify-content: flex-end;
+        }
+    
+        &.has-text-align-left {
+            justify-content: flex-start;
+        }
+    }
+
+    &.has-justified-space-between {
+        .wp-block-button__link {
+            justify-content: space-between;
+        }
     }
 
     &.has-icon__arrow-left,
@@ -99,4 +117,4 @@
             width: 0.9em;
         }
     }
-} 
+}

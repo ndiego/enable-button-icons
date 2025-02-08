@@ -174,6 +174,10 @@ function addAttributes( settings ) {
 			type: 'boolean',
 			default: false,
 		},
+		justifySpaceBetween: {
+			type: 'boolean',
+			default: false,
+		},
 	};
 
 	const newSettings = {
@@ -206,7 +210,7 @@ function addInspectorControls( BlockEdit ) {
 		}
 
 		const { attributes, setAttributes } = props;
-		const { icon: currentIcon, iconPositionLeft } = attributes;
+		const { icon: currentIcon, iconPositionLeft, justifySpaceBetween } = attributes;
 
 		return (
 			<>
@@ -244,7 +248,7 @@ function addInspectorControls( BlockEdit ) {
 								) ) }
 							</Grid>
 						</PanelRow>
-						<PanelRow>
+						<PanelRow className="button-icon-picker__settings">
 							<ToggleControl
 								label={ __(
 									'Show icon on left',
@@ -254,6 +258,18 @@ function addInspectorControls( BlockEdit ) {
 								onChange={ () => {
 									setAttributes( {
 										iconPositionLeft: ! iconPositionLeft,
+									} );
+								} }
+							/>
+							<ToggleControl
+								label={ __(
+									'Justify space between',
+									'enable-button-icons'
+								) }
+								checked={ justifySpaceBetween }
+								onChange={ () => {
+									setAttributes( {
+										justifySpaceBetween: ! justifySpaceBetween,
 									} );
 								} }
 							/>
@@ -288,6 +304,7 @@ function addClasses( BlockListBlock ) {
 		const classes = classnames( props?.className, {
 			[ `has-icon__${ attributes?.icon }` ]: attributes?.icon,
 			'has-icon-position__left': attributes?.iconPositionLeft,
+			'has-justified-space-between': attributes?.justifySpaceBetween,
 		} );
 
 		return <BlockListBlock { ...props } className={ classes } />;

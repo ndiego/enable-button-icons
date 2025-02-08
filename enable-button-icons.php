@@ -3,7 +3,7 @@
  * Plugin Name:         Enable Button Icons
  * Plugin URI:          https://www.nickdiego.com/
  * Description:         Easily add icons to Button blocks.
- * Version:             0.1.0
+ * Version:             0.2.0
  * Requires at least:   6.3
  * Requires PHP:        7.4
  * Author:              Nick Diego
@@ -69,8 +69,9 @@ function enable_button_icons_render_block_button( $block_content, $block ) {
 		return $block_content;
 	}
 
-	$icon         = $block['attrs']['icon'];
-	$positionLeft = isset( $block['attrs']['iconPositionLeft'] ) ? $block['attrs']['iconPositionLeft'] : false;
+	$icon                = $block['attrs']['icon'];
+	$positionLeft        = isset( $block['attrs']['iconPositionLeft'] ) ? $block['attrs']['iconPositionLeft'] : false;
+	$justifySpaceBetween = isset( $block['attrs']['justifySpaceBetween'] ) ? $block['attrs']['justifySpaceBetween'] : false;
 	
 	// All available icon SVGs.
 	$icons = array(
@@ -105,6 +106,9 @@ function enable_button_icons_render_block_button( $block_content, $block ) {
 	$p = new WP_HTML_Tag_Processor( $block_content );
 	if ( $p->next_tag() ) {
 		$p->add_class( 'has-icon__' . $icon );
+		if ( $justifySpaceBetween ) {
+			$p->add_class( 'has-justified-space-between' );
+		}
 	}
 	$block_content = $p->get_updated_html();
 

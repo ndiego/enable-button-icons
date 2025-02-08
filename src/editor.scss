@@ -42,7 +42,7 @@ $wordpress: "data:image/svg+xml;utf8,<svg width='20' height='20' xmlns='http://w
             mask-image: url( $chevron_right );
             -webkit-mask-image: url( $chevron_right );
         } 
-    } 
+    }
 
     &.has-icon-position__left {
         .wp-block-button__link {
@@ -279,5 +279,15 @@ $wordpress: "data:image/svg+xml;utf8,<svg width='20' height='20' xmlns='http://w
         border-radius: 2px;
         padding: 2px;
         width: 100%;
+    }
+
+    .button-icon-picker__settings {
+        flex-wrap: wrap;
+        gap: 16px;
+        
+        .components-toggle-control {
+            flex-basis: 100%;
+            margin-bottom: 0;
+        }
     }
 }
